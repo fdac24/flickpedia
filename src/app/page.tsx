@@ -1,12 +1,13 @@
 "use client"; // This makes the component a Client Component
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Correct import for the app directory
+import { useRouter } from "next/navigation";
+import Image from 'next/image'; 
 
 export default function Home() {
   const [quote, setQuote] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter(); // Using Next.js router for navigation
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -17,36 +18,57 @@ export default function Home() {
       return;
     }
 
-    // Navigate to the results page, passing the quote as a query parameter
     router.push(`/search?quote=${encodeURIComponent(quote)}`);
   };
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <h1 className="text-4xl font-bold">Flickpedia - Search Friends Quotes</h1>
-        
-        <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4">
+    <div className="min-h-screen bg-white p-8 pb-20 sm:p-20 font-sans flex flex-col items-center">
+      <main className="flex flex-col gap-8 items-center w-full max-w-2xl">
+        {/* Logo Section */}
+        <div className="w-full flex justify-center mb-6">
+          <Image
+            src="/Flickpedia-logo.png" 
+            alt="Flickpedia Logo"
+            width={1000} 
+            height={110}
+            className="object-contain"
+            style={{ margin: 0, padding: 0 }} 
+          />
+        </div>
+
+        {/* Blurb in Yellow Box */}
+        <div className="w-full bg-[#f5eec9] p-6 rounded-lg shadow-md">
+          <p className="text-lg text-gray-700 leading-7 text-center">
+            Flickpedia helps you remember epsiodes from your favorite TV shows
+            using quotes you remeber! Simply enter a quote or a phrase and we 
+            will show you which episode it came from, along with other
+            matching quotes. Start your search below and relive your favorite moments!
+          </p>
+        </div>
+
+        {/* Search Form */}
+        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
           <input
             type="text"
             placeholder="Enter a quote..."
-            className="border border-gray-300 p-2 rounded-md w-64"
+            className="border border-gray-300 p-4 rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 w-full sm:w-96 transition ease-in-out duration-200"
             value={quote}
             onChange={(e) => setQuote(e.target.value)}
           />
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="bg-[#822f12] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#6b2410] transition duration-300 w-full sm:w-96 shadow-lg"
           >
             Search
           </button>
         </form>
-        
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-        
+
+        {/* Error Handling */}
+        {error && <p className="text-red-500 text-lg mt-2">{error}</p>}
       </main>
 
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
+      {/* Footer */}
+      <footer className="mt-16 w-full flex justify-center text-gray-500 text-sm">
         <p>Created by Flickpedia Team © 2024</p>
       </footer>
     </div>
