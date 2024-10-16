@@ -16,16 +16,22 @@ import {
 import { Input } from "@/components/ui/input";
 
 const FormSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  show: z.string().min(2, { message: "Show is required." }),
+  season: z.number().min(1, { message: "Season is required." }),
+  episode_name: z.string().min(2, { message: "Episode name is required." }),
+  episode_number: z.number().min(1, { message: "Episode number is required." }),
+  script: z.instanceof(File),
 });
 
 export default function InputForm() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      username: "",
+      show: "",
+      season: 0,
+      episode_name: "",
+      episode_number: 0,
+      script: undefined,
     },
   });
 
@@ -43,16 +49,73 @@ export default function InputForm() {
           <h3 className="text-4xl font-bold">Data Import</h3>
           <FormField
             control={form.control}
-            name="username"
+            name="show"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Show</FormLabel>
                 <FormControl>
                   <Input placeholder="shadcn" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="season"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Season</FormLabel>
+                <FormControl>
+                  <Input placeholder="shadcn" type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex flex-row space-x-2 w-full">
+            <FormField
+              control={form.control}
+              name="episode_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Episode Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="shadcn" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="episode_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Episode Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="shadcn" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="script"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Script</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="shadcn"
+                    type="file"
+                    onChange={(e) => {
+                      field.onChange(e.target.files);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
