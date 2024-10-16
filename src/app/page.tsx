@@ -1,12 +1,13 @@
 "use client"; // This makes the component a Client Component
 
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // Correct import for the app directory
 
 export default function Home() {
   const [quote, setQuote] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter(); // Using Next.js router for navigation
 
-  // Add the correct type for the event parameter 'e'
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
@@ -16,8 +17,8 @@ export default function Home() {
       return;
     }
 
-    // This is where the search logic would go (API call or client-side logic).
-    console.log("Searching for quote:", quote);
+    // Navigate to the results page, passing the quote as a query parameter
+    router.push(`/search?quote=${encodeURIComponent(quote)}`);
   };
 
   return (
