@@ -1,6 +1,36 @@
 "use client"; // This makes the component a Client Component
 
 import { useState } from "react";
+import Fuse from "fuse.js"
+
+
+const list = [
+  {
+    "Year_of_prod": 1994,
+    "Season": 1,
+    "Episode_Title": "The One with the Sonogram at the End",
+    "Duration": 22,
+    "Summary": "Ross finds out his ex-wife is pregnant. Rachel returns her engagement ring to Barry. Monica becomes stressed when her and Ross's parents come to visit.",
+    "Director": "James Burrows",
+    "Stars": 8.1,
+    "Votes": 4888
+  },
+  {
+    "Year_of_prod": 1994,
+    "Season": 1,
+    "Episode_Title": "The One with the Thumb",
+    "Duration": 22,
+    "Summary": "Monica becomes irritated when everyone likes her new boyfriend more than she does. Chandler resumes his smoking habit. Phoebe is given $7000 when she finds a thumb in a can of soda.",
+    "Director": "James Burrows",
+    "Stars": 8.2,
+    "Votes": 4605
+  }
+];
+
+const options = {
+  includeScore: true,
+  keys: ["Episode_Title", "Summary"]
+}
 
 export default function Home() {
   const [quote, setQuote] = useState('');
@@ -18,6 +48,10 @@ export default function Home() {
 
     // This is where the search logic would go (API call or client-side logic).
     console.log("Searching for quote:", quote);
+    const fuse = new Fuse(list, options)
+
+    const result = fuse.search(quote)
+    console.log(result)
   };
 
   return (
