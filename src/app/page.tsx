@@ -1,6 +1,6 @@
 "use client"; // This makes the component a Client Component
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home() {
   console.log("page.tsx");
@@ -43,6 +43,10 @@ export default function Home() {
 
     // This is where the search logic would go (API call or client-side logic).
     console.log("Searching for quote:", quote);
+    const fuse = new Fuse(list, options)
+
+    const result = fuse.search(quote)
+    console.log(result)
   };
 
   return (
