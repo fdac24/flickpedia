@@ -1,8 +1,33 @@
 "use client"; // This makes the component a Client Component
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  console.log("page.tsx");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("before response and data");
+        //console.log("MongoDB URI:", process.env.MONGODB_URI);
+
+        const response = await fetch('/api');
+        console.log("after response");
+        const data = await response.json();
+        console.log("after data");
+        if (response.ok) {
+          console.log(data.message); // Log success message
+        } else {
+          console.error("Error connecting:", data.error); // Log error message
+        }
+      }
+      catch(error){
+        console.error("Fetch error:", error); // Log any fetch errors
+      }
+    };
+    fetchData();
+  }, []);
+  console.log("after useEffect()");
+
   const [quote, setQuote] = useState('');
   const [error, setError] = useState('');
 
