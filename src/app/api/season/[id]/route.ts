@@ -1,5 +1,5 @@
+import { deleteSeason, getSeason, updateSeason } from "@/db/actions/season";
 import { NextResponse } from "next/server";
-import { deleteShow, getShowById, updateShow } from "@/db/actions/show";
 
 export async function GET(
   req: Request,
@@ -13,21 +13,21 @@ export async function GET(
 
   if (!id) {
     return NextResponse.json(
-      { error: "Show ID is required." },
+      { error: "Season ID is required." },
       { status: 400 }
     );
   }
 
   try {
-    const show = await getShowById(id);
-    if (!show) {
-      return NextResponse.json({ error: "Show not found." }, { status: 404 });
+    const season = await getSeason(id);
+    if (!season) {
+      return NextResponse.json({ error: "Season not found." }, { status: 404 });
     }
-    return NextResponse.json(show, { status: 200 });
+    return NextResponse.json(season, { status: 200 });
   } catch (error) {
-    console.error("Error fetching show by ID:", error);
+    console.error("Error fetching season by ID:", error);
     return NextResponse.json(
-      { error: "Failed to fetch show." },
+      { error: "Failed to fetch season." },
       { status: 500 }
     );
   }
@@ -45,27 +45,27 @@ export async function PUT(
 
   if (!id) {
     return NextResponse.json(
-      { error: "Show ID is required." },
+      { error: "Season ID is required." },
       { status: 400 }
     );
   }
 
-  const showData = await req.json();
+  const seasonData = await req.json();
 
-  if (!showData) {
+  if (!seasonData) {
     return NextResponse.json(
-      { error: "Show data is required." },
+      { error: "Season data is required." },
       { status: 400 }
     );
   }
 
   try {
-    const show = await updateShow(id, showData);
-    return NextResponse.json(show, { status: 200 });
+    const season = await updateSeason(id, seasonData);
+    return NextResponse.json(season, { status: 200 });
   } catch (error) {
-    console.error("Error updating show by ID:", error);
+    console.error("Error updating season by ID:", error);
     return NextResponse.json(
-      { error: "Failed to update show." },
+      { error: "Failed to update season." },
       { status: 500 }
     );
   }
@@ -83,18 +83,18 @@ export async function DELETE(
 
   if (!id) {
     return NextResponse.json(
-      { error: "Show ID is required." },
+      { error: "Season ID is required." },
       { status: 400 }
     );
   }
 
   try {
-    await deleteShow(id);
-    return NextResponse.json({ message: "Show deleted." }, { status: 200 });
+    await deleteSeason(id);
+    return NextResponse.json({ message: "Season deleted." }, { status: 200 });
   } catch (error) {
-    console.error("Error deleting show by ID:", error);
+    console.error("Error deleting season by ID:", error);
     return NextResponse.json(
-      { error: "Failed to delete show." },
+      { error: "Failed to delete season." },
       { status: 500 }
     );
   }
