@@ -3,9 +3,9 @@ import { IEpisode } from "@/db/models/episode";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const episode: IEpisode = await req.json();
+  const episodeData: IEpisode = await req.json();
 
-  if (!episode) {
+  if (!episodeData) {
     return NextResponse.json(
       { error: "Episode data is required." },
       { status: 400 }
@@ -13,8 +13,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    await createEpisode(episode);
-    return NextResponse.json({ message: "Episode created." }, { status: 201 });
+    const episode = await createEpisode(episodeData);
+    return NextResponse.json(episodeData, { status: 201 });
   } catch (error) {
     console.error("Error creating episode:", error);
     return NextResponse.json(

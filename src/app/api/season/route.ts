@@ -12,8 +12,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    await createSeason(number, showId);
-    return NextResponse.json({ message: "Season created." }, { status: 201 });
+    const season = await createSeason(number, showId);
+    return NextResponse.json(season, { status: 201 });
   } catch (error) {
     console.error("Error creating season:", error);
     return NextResponse.json(
