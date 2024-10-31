@@ -1,4 +1,4 @@
-import { ShowModel } from "../models";
+import { EpisodeModel, ShowModel } from "../models";
 import dbConnect from "../mongoose";
 
 export async function getShows() {
@@ -23,5 +23,14 @@ export async function updateShow(id: string, name: string) {
 
 export async function deleteShow(id: string) {
   await dbConnect();
-  return await ShowModel.findByIdAndDelete(id);
+  const show = await ShowModel.findById(id);
+
+  for (const season of show.seasons) {
+    for (const episode of season.episodes) {
+      await EpisodeModel.findByIdAndDelete(episode.id);
+    }
+    season.delete();
+  }
+
+  return await show.delete();
 }
