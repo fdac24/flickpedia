@@ -1,4 +1,7 @@
+"use server";
+
 import { EpisodeModel, ShowModel } from "../models";
+import { IShow } from "../models/show";
 import dbConnect from "../mongoose";
 
 export async function getShows() {
@@ -16,9 +19,9 @@ export async function createShow(name: string) {
   return await ShowModel.create({ name, seasons: [] });
 }
 
-export async function updateShow(id: string, name: string) {
+export async function updateShow(id: string, showData: IShow) {
   await dbConnect();
-  return await ShowModel.findByIdAndUpdate(id, { name }, { new: true });
+  return await ShowModel.findByIdAndUpdate(id, showData, { new: true });
 }
 
 export async function deleteShow(id: string) {
