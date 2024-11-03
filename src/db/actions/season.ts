@@ -1,3 +1,5 @@
+"use server";
+
 import { EpisodeModel, SeasonModel } from "../models";
 import { ISeason } from "../models/season";
 import Show from "../models/show";

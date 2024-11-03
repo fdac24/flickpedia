@@ -1,3 +1,5 @@
+"use server";
+
 import { EpisodeModel, SeasonModel } from "../models";
 import { IEpisode } from "../models/episode";
 import dbConnect from "../mongoose";
