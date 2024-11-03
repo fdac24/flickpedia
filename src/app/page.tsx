@@ -1,21 +1,23 @@
 "use client"; // This makes the component a Client Component
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Fuse, { FuseResult } from "fuse.js";
 
 export default function Home() {
-  console.log("page.tsx");
+  const [scripts, setScripts] = useState([]);
+  const [results, setResults] = useState<FuseResult<any>[]>([]);
+  const [quote, setQuote] = useState('');
+  const [error, setError] = useState('');
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("before response and data");
         //console.log("MongoDB URI:", process.env.MONGODB_URI);
 
-        const response = await fetch('/api');
-        console.log("after response");
+        const response = await fetch('/api/episode/scripts');
         const data = await response.json();
-        console.log("after data");
         if (response.ok) {
-          console.log(data.message); // Log success message
+          setScripts(data)
+          console.log(data); // Log success message
         } else {
           console.error("Error connecting:", data.error); // Log error message
         }
@@ -26,10 +28,7 @@ export default function Home() {
     };
     fetchData();
   }, []);
-  console.log("after useEffect()");
 
-  const [quote, setQuote] = useState('');
-  const [error, setError] = useState('');
 
   // Add the correct type for the event parameter 'e'
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -43,10 +42,18 @@ export default function Home() {
 
     // This is where the search logic would go (API call or client-side logic).
     console.log("Searching for quote:", quote);
-    const fuse = new Fuse(list, options)
 
+    const options = {
+      includeScore: true,
+      ignoreLocation: true,
+      keys: ['script']
+    }
+
+    const fuse = new Fuse(scripts, options);
+    
     const result = fuse.search(quote)
-    console.log(result)
+    setResults(result);
+    console.log(results)
   };
 
   return (
