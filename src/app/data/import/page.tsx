@@ -14,6 +14,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { getShows } from "@/db/actions/show";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect, useState } from "react";
 
 const FormSchema = z.object({
   show: z.string().min(2, { message: "Show is required." }),
@@ -35,6 +44,15 @@ export default function InputForm() {
     },
   });
 
+  const [shows, setShows] = useState<{ _id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    async function fetchShows() {
+      await getShows().then((shows) => setShows(shows));
+    }
+    fetchShows();
+  }, []);
+
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log(data);
   }
@@ -47,19 +65,35 @@ export default function InputForm() {
           className="w-[90vw] max-w-[500px] space-y-6"
         >
           <h3 className="text-4xl font-bold">Data Import</h3>
+
+          {/* Shows */}
           <FormField
             control={form.control}
             name="show"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Show</FormLabel>
-                <FormControl>
-                  <Input placeholder="shadcn" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a show" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {shows.map((show) => (
+                      <SelectItem value={show._id}>{show.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {/* Season */}
           <FormField
             control={form.control}
             name="season"

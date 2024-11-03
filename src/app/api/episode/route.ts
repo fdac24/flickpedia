@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
   try {
     const episode = await createEpisode(episodeData);
-    return NextResponse.json(episodeData, { status: 201 });
+    return NextResponse.json(episode, { status: 201 });
   } catch (error) {
     console.error("Error creating episode:", error);
     return NextResponse.json(
