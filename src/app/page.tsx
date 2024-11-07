@@ -1,37 +1,14 @@
 "use client"; // This makes the component a Client Component
 
-import { useState, useEffect } from "react";
-import Fuse, { FuseResult } from "fuse.js";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from 'next/image';
 
 export default function Home() {
-  const [scripts, setScripts] = useState([]);
-  const [results, setResults] = useState<FuseResult<any>[]>([]);
   const [quote, setQuote] = useState('');
   const [error, setError] = useState('');
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        //console.log("MongoDB URI:", process.env.MONGODB_URI);
+  const router = useRouter();
 
-        const response = await fetch('/api/episode/scripts');
-        const data = await response.json();
-        if (response.ok) {
-          setScripts(data)
-          console.log(data); // Log success message
-        } else {
-          console.error("Error connecting:", data.error); // Log error message
-        }
-      }
-      catch(error){
-        console.error("Fetch error:", error); // Log any fetch errors
-      }
-    };
-    fetchData();
-  }, []);
-
-
-  // Add the correct type for the event parameter 'e'
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
@@ -41,20 +18,8 @@ export default function Home() {
       return;
     }
 
-    // This is where the search logic would go (API call or client-side logic).
-    console.log("Searching for quote:", quote);
-
-    const options = {
-      includeScore: true,
-      ignoreLocation: true,
-      keys: ['script']
-    }
-
-    const fuse = new Fuse(scripts, options);
-    
-    const result = fuse.search(quote)
-    setResults(result);
-    console.log(results)
+    // Redirect to the search results page with the quote as a query parameter
+    router.push(`/search?quote=${encodeURIComponent(quote)}`);
   };
 
   return (
@@ -102,20 +67,6 @@ export default function Home() {
 
         {/* Error Handling */}
         {error && <p className="text-red-500 text-lg mt-2">{error}</p>}
-
-        {/* Results Section */}
-        {results.length > 0 && (
-          <div className="w-full mt-8">
-            <h2 className="text-xl font-semibold mb-4">Search Results:</h2>
-            <ul className="space-y-4">
-              {results.map((result, index) => (
-                <li key={index} className="border p-4 rounded-lg shadow-md">
-                  {result.item.script}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </main>
 
       {/* Footer */}
