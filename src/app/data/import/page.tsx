@@ -1,8 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useFieldArray, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,7 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { getShows } from "@/db/actions/show";
 import {
   Select,
   SelectContent,
@@ -23,56 +21,76 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-
-const FormSchema = z.object({
-  show: z.string().min(2, { message: "Show is required." }),
-  season: z.number().min(1, { message: "Season is required." }),
-  episode_name: z.string().min(2, { message: "Episode name is required." }),
-  episode_number: z.number().min(1, { message: "Episode number is required." }),
-  script: z.instanceof(File),
-});
+import { DataImportForm, DataImportFormSchema } from "@/types/DataImportForm";
 
 export default function InputForm() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<DataImportForm>({
+    resolver: zodResolver(DataImportFormSchema),
     defaultValues: {
-      show: "",
-      season: 0,
-      episode_name: "",
-      episode_number: 0,
-      script: undefined,
+      show: undefined,
+      showName: "",
+      scripts: [],
     },
   });
 
-  const [shows, setShows] = useState<{ _id: string; name: string }[]>([]);
+  type Show = {
+    _id: string;
+    name: string;
+    seasons: [];
+  };
+
+  const [shows, setShows] = useState<Show[]>([]);
 
   useEffect(() => {
-    async function fetchShows() {
-      await getShows().then((shows) => setShows(shows));
-    }
+    const fetchShows = async () => {
+      const shows = await fetch("/api/show").then((res) => res.json());
+      console.log(shows);
+      setShows(shows);
+    };
+
     fetchShows();
   }, []);
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "scripts",
+  });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach((file) => {
+      append({
+        name: file.name,
+        size: file.size,
+        type: file.type as "text/plain",
+        season: 0,
+        episode_name: "",
+        episode_number: 0,
+      });
+    });
+  };
+
+  const onSubmit = (data: DataImportForm) => {
     console.log(data);
-  }
+  };
 
   return (
-    <div className="h-screen w-screen flex justify-center items-center">
+    <div className="h-screen w-screen flex flex-col justify-center items-center">
+      {/* Title here later */}
+      <h3 className="font-semibold text-gray-700 text-3xl">Data Import</h3>
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-[90vw] max-w-[500px] space-y-6"
+          className="w-[90vw] max-w-[800px] space-y-6"
         >
-          <h3 className="text-4xl font-bold">Data Import</h3>
-
-          {/* Shows */}
+          {/* Select Show */}
           <FormField
             control={form.control}
             name="show"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Show</FormLabel>
+                <FormLabel className="font-semibold text-gray-700">Show</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -83,8 +101,11 @@ export default function InputForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="-1">Add a New Show</SelectItem>
                     {shows.map((show) => (
-                      <SelectItem value={show._id}>{show.name}</SelectItem>
+                      <SelectItem key={show._id} value={show._id}>
+                        {show.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -93,67 +114,89 @@ export default function InputForm() {
             )}
           />
 
-          {/* Season */}
+          {/* New Show Name */}
+          {form.watch("show") === "-1" && (
+            <FormField
+              control={form.control}
+              name="showName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold text-gray-700">Show Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="The Office" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Make sure to format the show name properly.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {/* Script Upload */}
           <FormField
             control={form.control}
-            name="season"
-            render={({ field }) => (
+            name="scripts"
+            render={() => (
               <FormItem>
-                <FormLabel>Season</FormLabel>
+                <FormLabel className="font-semibold text-gray-700">Upload Scripts</FormLabel>
                 <FormControl>
-                  <Input placeholder="shadcn" type="number" {...field} />
+                  <div>
+                    <Input type="file" multiple onChange={handleFileUpload} />
+                    {form.watch("scripts").length > 0 && (
+                      <div className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 items-center mt-4 font-semibold text-gray-700">
+                        <p className="col-span-1">File Name</p>
+                        <p className="col-span-1">Season</p>
+                        <p className="col-span-1">Episode Number</p>
+                        <p className="col-span-1">Episode Name</p>
+                      </div>
+                    )}
+                    {fields.map((field, index) => (
+                      <div
+                        className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 items-center mt-4" // 5 columns for file name, season, episode number, episode name, and delete button
+                        key={field.id}
+                      >
+                        <p className="col-span-1">{field.name}</p>{" "}
+                        {/* File name */}
+                        <Input
+                          type="number"
+                          placeholder="Season"
+                          {...form.register(`scripts.${index}.season`, {
+                            valueAsNumber: true,
+                          })}
+                          className="col-span-1" // Season input field
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Episode Number"
+                          {...form.register(`scripts.${index}.episode_number`, {
+                            valueAsNumber: true,
+                          })}
+                          className="col-span-1" // Episode number input field
+                        />
+                        <Input
+                          placeholder="Episode Name"
+                          {...form.register(`scripts.${index}.episode_name`)}
+                          className="col-span-1" // Episode name input field
+                        />
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          className="col-span-1 text-red-500 hover:text-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex flex-row space-x-2 w-full">
-            <FormField
-              control={form.control}
-              name="episode_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Episode Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="shadcn" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="episode_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Episode Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="shadcn" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormField
-            control={form.control}
-            name="script"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Script</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="shadcn"
-                    type="file"
-                    onChange={(e) => {
-                      field.onChange(e.target.files);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
+          {/* Submit */}
           <Button type="submit">Submit</Button>
         </form>
       </Form>
