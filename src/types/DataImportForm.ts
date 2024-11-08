@@ -6,15 +6,13 @@ const FileSchema = z.object({
     .number()
     .max(10 * 1024 * 1024, { message: "File size must be less than 10MB." }),
   type: z.enum(["text/plain"], { message: "File type must be plain text." }),
+  content: z.string(),
 });
 
 export const DataImportFormSchema = z
   .object({
     show: z.string().min(1, "Show is required."),
-    showName: z
-      .string()
-      .min(2, { message: "Show name is required." })
-      .optional(),
+    showName: z.string().optional(),
     scripts: z
       .array(
         FileSchema.extend({
@@ -31,8 +29,8 @@ export const DataImportFormSchema = z
       )
       .nonempty({ message: "At least one script is required." }),
   })
-  .refine((data) => (data.show === "-1" ? !!data.showName : true), {
-    message: "Show name is required.",
+  .refine((data) => !(data.show === "-1" && !data.showName), {
+    message: "Show name is required when adding a new show.",
     path: ["showName"],
   });
 

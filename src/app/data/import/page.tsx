@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { DataImportForm, DataImportFormSchema } from "@/types/DataImportForm";
+import dataImport, { DataPayload } from "@/lib/dataImport";
 
 export default function InputForm() {
   const form = useForm<DataImportForm>({
@@ -59,19 +60,44 @@ export default function InputForm() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     files.forEach((file) => {
-      append({
-        name: file.name,
-        size: file.size,
-        type: file.type as "text/plain",
-        season: 0,
-        episode_name: "",
-        episode_number: 0,
-      });
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        append({
+          name: file.name,
+          size: file.size,
+          type: file.type as "text/plain",
+          season: 0,
+          episode_name: "",
+          episode_number: 0,
+          content: reader.result as string,
+        });
+      };
+
+      reader.readAsText(file);
     });
   };
 
-  const onSubmit = (data: DataImportForm) => {
-    console.log(data);
+  const onSubmit = async (data: DataImportForm) => {
+    const payload: DataPayload = {
+      showId: data.show,
+      showName: data.showName || "",
+      scripts: data.scripts.map((script) => ({
+        seasonNumber: script.season,
+        episodeNumber: script.episode_number,
+        episodeName: script.episode_name,
+        script: script.content,
+      })),
+    };
+
+    try {
+      await dataImport(payload);
+      console.log("Data imported successfully!");
+    } catch (error) {
+      console.error("Error importing data:", error);
+    }
+
+    console.log(payload);
   };
 
   return (
@@ -90,7 +116,9 @@ export default function InputForm() {
             name="show"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-semibold text-gray-700">Show</FormLabel>
+                <FormLabel className="font-semibold text-gray-700">
+                  Show
+                </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -121,7 +149,9 @@ export default function InputForm() {
               name="showName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-semibold text-gray-700">Show Name</FormLabel>
+                  <FormLabel className="font-semibold text-gray-700">
+                    Show Name
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="The Office" {...field} />
                   </FormControl>
@@ -140,7 +170,9 @@ export default function InputForm() {
             name="scripts"
             render={() => (
               <FormItem>
-                <FormLabel className="font-semibold text-gray-700">Upload Scripts</FormLabel>
+                <FormLabel className="font-semibold text-gray-700">
+                  Upload Scripts
+                </FormLabel>
                 <FormControl>
                   <div>
                     <Input type="file" multiple onChange={handleFileUpload} />
@@ -165,7 +197,7 @@ export default function InputForm() {
                           {...form.register(`scripts.${index}.season`, {
                             valueAsNumber: true,
                           })}
-                          className="col-span-1" // Season input field
+                          className="col-span-1"
                         />
                         <Input
                           type="number"
@@ -173,12 +205,12 @@ export default function InputForm() {
                           {...form.register(`scripts.${index}.episode_number`, {
                             valueAsNumber: true,
                           })}
-                          className="col-span-1" // Episode number input field
+                          className="col-span-1"
                         />
                         <Input
                           placeholder="Episode Name"
                           {...form.register(`scripts.${index}.episode_name`)}
-                          className="col-span-1" // Episode name input field
+                          className="col-span-1"
                         />
                         <button
                           type="button"
