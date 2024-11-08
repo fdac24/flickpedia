@@ -13,18 +13,21 @@ const ShowSchema: Schema = new Schema({
     type: String,
     required: true,
   },
-  seasons: [
-    {
-      id: {
-        type: Schema.Types.ObjectId,
-        required: true,
+  seasons: {
+    type: [
+      {
+        id: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+        number: {
+          type: Number,
+          required: true,
+        },
       },
-      number: {
-        type: Number,
-        required: true,
-      },
-    },
-  ],
+    ],
+    default: [],
+  },
 });
 
 const Show = mongoose.models.Show || mongoose.model<IShow>("Show", ShowSchema);
