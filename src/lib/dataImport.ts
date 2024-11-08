@@ -25,13 +25,17 @@ export default async function dataImport({
     throw new Error("Show name is required.");
   }
 
-  // create show
-  const show =
-    showId === "-1" && !!showName
-      ? await createShow(showName)
-      : await getShowById(showId);
+  // create show if showId is "-1"
+  let show;
+  if (showId === "-1" && showName) {
+    show = await createShow(showName);
+    showId = show._id.toString(); // Update showId to the new ObjectId as a string
+  } else {
+    show = await getShowById(showId);
+  }
 
-  scripts.forEach(async (script) => {
+  // Use for...of loop to handle async/await properly
+  for (const script of scripts) {
     const {
       seasonNumber,
       episodeName,
@@ -40,25 +44,32 @@ export default async function dataImport({
     } = script;
 
     // handle season
-    // check season array in show, check each season for number, if season and number match then it exists
     let season = show.seasons.find(
       (season: { _id: number; number: number }) =>
         season.number === seasonNumber
     );
-    if (season === undefined) {
+
+    // Create season if it doesn't exist
+    if (!season) {
       season = await createSeason(seasonNumber, showId);
+      if (!season) {
+        throw new Error(`Failed to create season ${seasonNumber} for show ${showId}`);
+      }
+
+      show = await getShowById(showId); // when season is created, show is updated
     }
+
     const seasonId = season._id;
 
     const episode: IEpisode = {
       number: episodeNumber,
       name: episodeName,
       season: seasonId,
-      show: showId,
+      show: showId, // Now a valid ObjectId
       script: content,
     };
 
     // create episode
     await createEpisode(episode);
-  });
+  }
 }

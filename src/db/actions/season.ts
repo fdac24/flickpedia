@@ -22,6 +22,8 @@ export async function createSeason(number: number, showId: string) {
       },
     },
   });
+
+  return season;
 }
 
 export async function updateSeason(id: string, seasonData: ISeason) {

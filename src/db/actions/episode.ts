@@ -27,6 +27,8 @@ export async function createEpisode(episodeData: IEpisode) {
       },
     },
   });
+
+  return episode;
 }
 
 export async function updateEpisode(id: string, episode: IEpisode) {
@@ -41,4 +43,6 @@ export async function deleteEpisode(id: string) {
   await SeasonModel.findByIdAndUpdate(episode.season, {
     $pull: { episodes: { id: episode._id } },
   });
+
+  return await episode.delete();
 }
