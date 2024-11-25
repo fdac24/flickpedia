@@ -28,9 +28,9 @@ function SearchResultsContent() {
         const data = await response.json();
         if (response.ok) {
           setScripts(data);
-          console.log("Fetched scripts:", data); // Log success message
+          console.log("Fetched scripts: ", data) // Log success message
         } else {
-          console.error("Error connecting:", data.error); // Log error message
+          console.error("Error connecting: ", data.error); // Log error message
         }
       } catch (error) {
         console.error("Fetch error:", error); // Log any fetch errors
@@ -58,9 +58,22 @@ function SearchResultsContent() {
     }
   }, [quote, scripts]);
 
+  const getMatchingLines = (scriptText: string, targetQuote: string) => {
+    const lines = scriptText.split('\n'); // Split script into lines
+    return lines.filter(line => line.toLowerCase().includes(targetQuote.toLowerCase())); // Filter lines that contain the quote
+  };
+
+  // Highlight the word/phrase that the user searched for
+  const highlightMatchingText = (line: string, targetQuote: string) => {
+    const regex = new RegExp(`(${targetQuote})`, 'gi'); // Case-insensitive match
+    return line.split(regex).map((part, index) =>
+      part.toLowerCase() === targetQuote.toLowerCase() ? <strong key={index} className="text-[#822f12]">{part}</strong> : part
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white p-8 sm:p-20 font-sans">
-      {/* Navigation Tabs */}
+      {}
       <nav className="flex justify-start gap-4 mb-6">
         <Link href="/" className="px-4 py-2 bg-gray-100 hover:bg-[#822f12] text-gray-700 hover:text-white rounded-lg">
           Home
@@ -80,12 +93,26 @@ function SearchResultsContent() {
 
         {!loading && results.length > 0 ? (
           <ul className="w-full max-w-4xl space-y-6">
-            {results.map((result, index) => (
-              <li key={index} className="bg-[#f5eec9] shadow-lg rounded-lg p-6">
-                <h2 className="text-2xl font-semibold text-gray-900">{result.item.episodeTitle}</h2>
-                <p className="text-gray-700 mt-4">{result.item.script}</p>
-              </li>
-            ))}
+            {results.map((result, index) => {
+              const matchingLines = getMatchingLines(result.item.script, quote);
+
+              // If there are lines that match what the user inputed
+              if (matchingLines.length > 0) {
+                return (
+                  <li key={index} className="bg-[#f5eec9] shadow-lg rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-gray-900">{result.item.episodeTitle}</h2>
+                    {}
+                    {matchingLines.map((line, lineIndex) => (
+                      <p key={lineIndex} className="text-gray-700 mt-4">
+                        {highlightMatchingText(line, quote)}
+                      </p>
+                    ))}
+                  </li>
+                );
+              }
+
+              return null; // Does not show anything if there are no matching lines
+            })}
           </ul>
         ) : (
           !loading && !error && (
