@@ -11,6 +11,11 @@ interface Script {
   episodeId: string;
 }
 
+const getTitleFromScript = (scriptText: string) => {
+  // Extract the first line (title) of the script
+  return scriptText.split('\n')[0].trim();
+};
+
 function SearchResultsContent() {
   const searchParams = useSearchParams();
   const quote = searchParams ? searchParams.get('quote') : null;
@@ -28,12 +33,12 @@ function SearchResultsContent() {
         const data = await response.json();
         if (response.ok) {
           setScripts(data);
-          console.log("Fetched scripts: ", data) // Log success message
+          console.log("Fetched scripts: ", data);
         } else {
-          console.error("Error connecting: ", data.error); // Log error message
+          console.error("Error connecting: ", data.error);
         }
       } catch (error) {
-        console.error("Fetch error:", error); // Log any fetch errors
+        console.error("Fetch error:", error);
         setError("Failed to fetch scripts");
       } finally {
         setLoading(false);
@@ -59,13 +64,13 @@ function SearchResultsContent() {
   }, [quote, scripts]);
 
   const getMatchingLines = (scriptText: string, targetQuote: string) => {
-    const lines = scriptText.split('\n'); // Split script into lines
-    return lines.filter(line => line.toLowerCase().includes(targetQuote.toLowerCase())); // Filter lines that contain the quote
+    const lines = scriptText.split('\n');
+    return lines.filter(line => line.toLowerCase().includes(targetQuote.toLowerCase()));
   };
 
   // Highlight the word/phrase that the user searched for
   const highlightMatchingText = (line: string, targetQuote: string) => {
-    const regex = new RegExp(`(${targetQuote})`, 'gi'); // Case-insensitive match
+    const regex = new RegExp(`(${targetQuote})`, 'gi');
     return line.split(regex).map((part, index) =>
       part.toLowerCase() === targetQuote.toLowerCase() ? <strong key={index} className="text-[#822f12]">{part}</strong> : part
     );
@@ -73,7 +78,6 @@ function SearchResultsContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white p-8 sm:p-20 font-sans">
-      {}
       <nav className="flex justify-start gap-4 mb-6">
         <Link href="/" className="px-4 py-2 bg-gray-100 hover:bg-[#822f12] text-gray-700 hover:text-white rounded-lg">
           Home
@@ -98,12 +102,13 @@ function SearchResultsContent() {
 
               // If there are lines that match what the user inputed
               if (matchingLines.length > 0) {
+                const title = getTitleFromScript(result.item.script); // Get the title for each transcript
+
                 return (
                   <li key={index} className="bg-[#f5eec9] shadow-lg rounded-lg p-6">
-                    <h2 className="text-2xl font-semibold text-gray-900">{result.item.episodeTitle}</h2>
-                    {}
+                    <h2 className="text-xl font-semibold text-gray-900">{title}</h2> {/* Smaller title */}
                     {matchingLines.map((line, lineIndex) => (
-                      <p key={lineIndex} className="text-gray-700 mt-4">
+                      <p key={lineIndex} className="text-lg text-gray-700 mt-4"> {/* Content text */}
                         {highlightMatchingText(line, quote)}
                       </p>
                     ))}
@@ -121,7 +126,6 @@ function SearchResultsContent() {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="mt-16 w-full flex justify-center text-gray-500 text-sm">
         <p>Created by Flickpedia Team © 2024</p>
       </footer>
