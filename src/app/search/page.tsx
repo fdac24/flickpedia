@@ -96,7 +96,9 @@ function SearchResultsContent() {
   };
 
   const getMatchingLines = (scriptText: string, targetQuote: string) => {
+    // Split the transcript into lines and only show the line that has the searched term in it
     const lines = scriptText.split('\n');
+    // Learned about the filter function: https://www.geeksforgeeks.org/filter-in-python/
     return lines.filter(line => line.toLowerCase().includes(targetQuote.toLowerCase()));
   };
 
