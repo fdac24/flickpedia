@@ -1,20 +1,44 @@
-"use client"; // This makes the component a Client Component
+"use client";  // This makes the component a Client Component
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from 'next/link';
 import Fuse, { FuseResult } from "fuse.js";
 
-interface Script {
-  script: string;
-  episodeTitle: string;
-  episodeId: string;
-}
-
-const getTitleFromScript = (scriptText: string) => {
-  // Extract the first line (title) of the script
-  return scriptText.split('\n')[0].trim();
+// Function to highlight the searched word/phrase with yellow background
+const highlightText = (text, highlight) => {
+  if (!highlight) return text;
+  const regex = new RegExp(`(${highlight})`, 'gi'); // Case-insensitive matching
+  return text.split(regex).map((part, index) =>
+    part.toLowerCase() === highlight.toLowerCase() ? (
+      <strong key={index} className="bg-[#f5eec9] text-[#822f12]">{part}</strong>
+    ) : (
+      part
+    )
+  );
 };
+
+// Learned about modals: https://www.dhiwise.com/post/a-comprehensive-guide-to-react-modals-everything-you-need-to-know
+function Modal({ isOpen, onClose, transcript, searchTerm }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white p-6 rounded-lg w-3/4 max-w-4xl relative"> {}
+        {/* Close putton on the top right of the modal for ease of user */}
+        <button onClick={onClose} className="absolute top-2 right-2 text-xl text-gray-600 hover:text-gray-800">
+          &times;
+        </button>
+        <h2 className="text-2xl font-bold mb-4">Full Transcript</h2>
+        <div className="overflow-y-auto max-h-[70vh]">
+          <pre className="whitespace-pre-wrap break-words">
+            {highlightText(transcript, searchTerm)}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
@@ -24,6 +48,8 @@ function SearchResultsContent() {
   const [results, setResults] = useState<FuseResult<Script>[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTranscript, setSelectedTranscript] = useState(null); // Need this for display for the modal
 
   // Fetch scripts from the API when the component loads
   useEffect(() => {
@@ -63,6 +89,12 @@ function SearchResultsContent() {
     }
   }, [quote, scripts]);
 
+  const getTitleFromScript = (scriptText: string) => {
+    // The title of the episode is always the first line, so we need to 
+    // get that line using indez 0 of the array of the script
+    return scriptText.split('\n')[0].trim();
+  };
+
   const getMatchingLines = (scriptText: string, targetQuote: string) => {
     const lines = scriptText.split('\n');
     return lines.filter(line => line.toLowerCase().includes(targetQuote.toLowerCase()));
@@ -74,6 +106,18 @@ function SearchResultsContent() {
     return line.split(regex).map((part, index) =>
       part.toLowerCase() === targetQuote.toLowerCase() ? <strong key={index} className="text-[#822f12]">{part}</strong> : part
     );
+  };
+
+  // Open modal with full transcript
+  const openModal = (transcript: string) => {
+    setSelectedTranscript(transcript);
+    setIsModalOpen(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedTranscript(null);
   };
 
   return (
@@ -105,13 +149,15 @@ function SearchResultsContent() {
                 const title = getTitleFromScript(result.item.script); // Get the title for each transcript
 
                 return (
-                  <li key={index} className="bg-[#f5eec9] shadow-lg rounded-lg p-6">
+                  // If the user clicks on a box, open up the modal with the full transcript displayed
+                  <li key={index} className="bg-[#f5eec9] shadow-lg rounded-lg p-6 cursor-pointer" onClick={() => openModal(result.item.script)}>
                     <h2 className="text-xl font-semibold text-gray-900">{title}</h2> {/* Smaller title */}
                     {matchingLines.map((line, lineIndex) => (
                       <p key={lineIndex} className="text-lg text-gray-700 mt-4"> {/* Content text */}
-                        {highlightMatchingText(line, quote)}
+                      {highlightMatchingText(line, quote)}
                       </p>
-                    ))}
+                      ))
+                    }
                   </li>
                 );
               }
@@ -129,6 +175,9 @@ function SearchResultsContent() {
       <footer className="mt-16 w-full flex justify-center text-gray-500 text-sm">
         <p>Created by Flickpedia Team © 2024</p>
       </footer>
+
+      {}
+      <Modal isOpen={isModalOpen} onClose={closeModal} transcript={selectedTranscript} searchTerm={quote} />
     </div>
   );
 }
