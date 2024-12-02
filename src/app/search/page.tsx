@@ -6,6 +6,14 @@ import Link from "next/link";
 import Fuse from "fuse.js";
 import { EpisodeInfo, getEpisodesInfoWithScript } from "@/db/actions/results";
 
+const escapeRegExp = (string: string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+const removeSceneInfo = (text: string) => {
+  return text.replace(/\[.*?\]/g, ""); // Removes all substrings inside [ ]
+};
+
 // Function to highlight the searched word/phrase with yellow background
 const highlightText = (text, highlight) => {
   if (!highlight) return text;
@@ -98,17 +106,24 @@ function SearchResultsContent() {
   }, [quote]); // Add quote as a dependency
 
   const getMatchingLines = (scriptText: string, targetQuote: string) => {
+    const cleanedText = removeSceneInfo(scriptText); // Remove scene information
     // Split the transcript into lines and only show the line that has the searched term in it
-    const lines = scriptText.split("\n");
+    const lines = cleanedText.split("\n");
     // Learned about the filter function: https://www.geeksforgeeks.org/filter-in-python/
     return lines.filter((line) =>
       line.toLowerCase().includes(targetQuote.toLowerCase())
     );
   };
 
+  const filteredResults = results.filter((result) => {
+    const matchingLines = getMatchingLines(result.script, quote);
+    return matchingLines.length > 0; // Only include results with actual matches
+  });
+
   // Highlight the word/phrase that the user searched for
   const highlightMatchingText = (line: string, targetQuote: string) => {
-    const regex = new RegExp(`(${targetQuote})`, "gi");
+    const escapedQuote = escapeRegExp(targetQuote); // Escape special characters
+    const regex = new RegExp(`(${escapedQuote})`, "gi");
     return line.split(regex).map((part, index) =>
       part.toLowerCase() === targetQuote.toLowerCase() ? (
         <strong key={index} className="text-[#822f12]">
@@ -154,7 +169,11 @@ function SearchResultsContent() {
         {loading && <p className="text-lg text-gray-600">Loading...</p>}
         {error && <p className="text-red-500 text-lg">Error: {error}</p>}
 
-        {!loading && results.length > 0 ? (
+        {!loading && !error && filteredResults.length === 0 && (
+          <p className="text-gray-700 text-lg">No matches found for "{quote}".</p>
+        )}
+
+        {!loading && filteredResults.length > 0 ? (
           <ul className="w-full max-w-4xl space-y-6">
             {results.map((result, index) => {
               const matchingLines = getMatchingLines(result.script, quote);
@@ -197,7 +216,7 @@ function SearchResultsContent() {
           !loading &&
           !error && (
             <p className="text-gray-700 text-lg">
-              No matches found for "{quote}".
+              
             </p>
           )
         )}

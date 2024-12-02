@@ -38,32 +38,66 @@ export default function Home() {
           />
         </div>
 
-        {/* Blurb in Yellow Box */}
-        <div className="w-full bg-[#f5eec9] p-6 rounded-lg shadow-md">
-          <p className="text-lg text-gray-700 leading-7 text-center">
-            Flickpedia helps you remember episodes from your favorite TV shows
-            using quotes you remember! Simply enter a quote or a phrase, and we 
-            will show you which episode it came from, along with other
-            matching quotes. Start your search below and relive your favorite moments!
+
+        {/* Usage Info Bubble */}
+        <div className="w-full flex items-center gap-4 bg-blue-100 p-4 rounded-lg shadow-md">
+          {/* Icon */}
+          <div className="flex-shrink-0 text-blue-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-8 h-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13 16h-1v-4h-1m1-4h.01M12 18.25a6.25 6.25 0 100-12.5 6.25 6.25 0 000 12.5z"
+              />
+            </svg>
+          </div>
+
+          {/* Text */}
+          <p className="text-lg text-blue-800 leading-7">
+            Flickpedia is a free to use tool created to help you find what epsiode your favorite scene is from! Simply
+            enter a quote or word you remember and let us find your epsiode!
           </p>
         </div>
 
-        {/* Search Form */}
-        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
-          <input
-            type="text"
-            placeholder="Enter a quote..."
-            className="border border-gray-300 p-4 rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 w-full sm:w-96 transition ease-in-out duration-200"
-            value={quote}
-            onChange={(e) => setQuote(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="bg-[#822f12] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#6b2410] transition duration-300 w-full sm:w-96 shadow-lg"
-          >
-            Search
-          </button>
-        </form>
+        {/* Container for Image and Form */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-6 w-full">
+          {/* Friends Picture */}
+          <div className="flex-shrink-0">
+            <Image
+              src="/friends.jpg"
+              alt="Friends Photo"
+              width={150} // Adjust width for a smaller image
+              height={100} // Adjust height proportionally
+              className="object-contain"
+              style={{ margin: 0, padding: 0 }}
+            />
+          </div>
+
+          {/* Search Form */}
+          <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4 w-full sm:w-auto">
+            <input
+              type="text"
+              placeholder="Enter a quote..."
+              className="border border-gray-300 p-4 rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 w-full sm:w-96 transition ease-in-out duration-200"
+              value={quote}
+              onChange={(e) => setQuote(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="bg-[#822f12] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#6b2410] transition duration-300 w-full sm:w-96 shadow-lg"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
 
         {/* Error Handling */}
         {error && <p className="text-red-500 text-lg mt-2">{error}</p>}
