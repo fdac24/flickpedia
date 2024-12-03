@@ -1,5 +1,5 @@
 # flickpedia
-The primary objective of our project is to develop a web-based platform that enables users to easily identify specific episodes and seasons of television series by entering memorable quotes. Our goal is to provide a seamless and efficient user experience, making it easy for users to search for episodes without needing to sift through entire transcripts manually. The platform will feature an intuitive search interface that will quickly match user input to the corresponding episode, providing episode titles, summaries, and relevant details.
+This project aims to create a web-based tool that allows users to search for episodes of the TV series "Friends" by entering quotes from the show. By processing transcript data, the platform identifies and displays the corresponding season and episode, making it easier for fans to locate their favorite scenes.
 
 ## Members
 - [Ann McClure](https://github.com/annmcclure)
