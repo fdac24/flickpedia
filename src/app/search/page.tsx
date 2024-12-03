@@ -82,14 +82,15 @@ function SearchResultsContent() {
             const options = {
               includeScore: true,
               ignoreLocation: true,
+              includeMatches: true,
               keys: ["script"],
+              threshold: 0.3, // Lower threshold for more results
             };
 
             const fuse = new Fuse(data, options); // Use data instead of scripts
             const result = fuse.search(quote);
             const episodes = await getEpisodesInfoWithScript(result);
             setResults(episodes);
-            console.log("Search results:", episodes);
           }
         } else {
           console.error("Error connecting: ", data.error);
@@ -196,7 +197,7 @@ function SearchResultsContent() {
                     </h2>{" "}
                     {/* Smaller title */}
                     <h2 className="text-l font-normal text-gray-900">
-                      {show_name}: Season {season_num}, Episode {episode_num}
+                      <i>{show_name}</i>: Season {season_num}, Episode {episode_num}
                     </h2>
                     {matchingLines.map((line, lineIndex) => (
                       <p key={lineIndex} className="text-lg text-gray-700 mt-4">
